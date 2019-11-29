@@ -14,12 +14,12 @@ import logging
 
 
 # typing
-_L = type(logging.Logger)
-_R = type(requests.Request)
-_REP = type(requests.Response)
-_S = type(requests.Session)
-_Q = type(Queue)
-#_LOC = type(threading.local())
+_L = logging.Logger
+_R = requests.Request
+_REP = requests.Response
+_S = requests.Session
+_Q = Queue
+#_LOC = threading.local()
 
 
 # utility constants
@@ -318,7 +318,7 @@ def main(target_path:str, file_name:str, logger:_L,
     # output to file
     output(target_path, pages, logger)
 
-    logger.warning(f'MainThread stopped, total time: {time.time()-t1:.5f}s')
+    logger.warning(f'All process done, total time: {time.time()-t1:.5f}s')
 
 
 if __name__ == '__main__':
@@ -333,7 +333,8 @@ if __name__ == '__main__':
     arg_parser.add_argument(
         '-o', '--offset', type=int, default=20,
         help='define how many pages starting from the "start" '
-             'page will be crwaled, an positive integer'
+             'number of pages that will be crwaled, an positive integer, '
+             'default=20'
     )
     arg_parser.add_argument(
         '-f', '--file_path', default='cnReuters_txt',
@@ -346,11 +347,11 @@ if __name__ == '__main__':
     )
     arg_parser.add_argument(
         '--downloader_count', type=int, default=6,
-        help='define the number of downloader threads'
+        help='define the number of downloader threads, default=6'
     )
     arg_parser.add_argument(
         '--parser_count', type=int, default=2,
-        help='define the number of parser threads'
+        help='define the number of parser threads, default=2'
     )
     arg_parser.add_argument(
         '-v', '--verbose', action='store_true',
@@ -360,12 +361,18 @@ if __name__ == '__main__':
         '--single_thread', action='store_true',
         help='use only one downloader thread and one parser thread'
     )
+    arg_parser.add_argument(
+        '--silent', action='store_true',
+        help='prevent any logging'
+    )
     
     args = arg_parser.parse_args()
     if args.verbose:
         logger = get_logger(True, logging.DEBUG)
-    else:
+    elif args.silent:
         logger = get_logger(False, logging.WARNING)
+    else:
+        logger = get_logger(True, logging.WARNING)
     check_path(args.file_path, logger)
     if not args.single_thread:
         main(
